@@ -1,0 +1,517 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Mechanic Shop API",
+    "description": "RESTFUL API for managing customers, mechanics, service tickets, and inventory.",
+    "version": "1.0.0"
+  },
+  "host": "127.0.0.1:5000",
+  "basePath": "/",
+  "schemes": ["http"],
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "description": "Enter your JWT token as 'Bearer <token>'"
+    }
+  },
+  "paths": {
+    "/customers/": {
+      "get": {
+        "tags": ["Customers"],
+        "summary": "Get paginated list of customers",
+        "description": "gets customers with pagination support and query response caching.",
+        "parameters": [
+          { "name": "page", "in": "query", "type": "integer", "default": 1 },
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "default": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated customer list",
+            "schema": { "$ref": "#/definitions/CustomerPaginatedResponse" }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Customers"],
+        "summary": "Register a new customer",
+        "description": "Creates a new customer account with hashed password storage.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/CustomerPayload" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Customer created successfully",
+            "schema": { "$ref": "#/definitions/CustomerResponse" }
+          },
+          "400": { "description": "Validation errors" }
+        }
+      }
+    },
+    "/customers/login": {
+      "post": {
+        "tags": ["Customers"],
+        "summary": "Authenticate customer",
+        "description": "Validates credentials and returns a Bearer token.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/LoginPayload" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "schema": { "$ref": "#/definitions/LoginResponse" }
+          },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/customers/my-tickets": {
+      "get": {
+        "tags": ["Customers"],
+        "summary": "GEt customer tickets",
+        "description": "Retrieves service tickets for the logged-in user using JWT auth.",
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "List of service tickets",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/ServiceTicketResponse" }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/customers/{id}": {
+      "put": {
+        "tags": ["Customers"],
+        "summary": "Update customer details",
+        "description": "Updates details for the authenticated customer.",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "integer" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/CustomerUpdatePayload" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer updated",
+            "schema": { "$ref": "#/definitions/CustomerResponse" }
+          },
+          "403": { "description": "Forbidden" }
+        }
+      },
+      "delete": {
+        "tags": ["Customers"],
+        "summary": "Delete customer account",
+        "description": "Deletes customer record.",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "integer" }
+        ],
+        "responses": {
+          "200": { "description": "Customer deleted" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/mechanics/": {
+      "get": {
+        "tags": ["Mechanics"],
+        "summary": "Get all mechanics",
+        "responses": {
+          "200": {
+            "description": "List of mechanics",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/MechanicResponse" }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Mechanics"],
+        "summary": "Create mechanic",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/MechanicPayload" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Mechanic created",
+            "schema": { "$ref": "#/definitions/MechanicResponse" }
+          }
+        }
+      }
+    },
+    "/mechanics/most-active": {
+      "get": {
+        "tags": ["Mechanics"],
+        "summary": "Get most active mechanics",
+        "description": "Retrieves mechanics ordered by work count.",
+        "responses": {
+          "200": {
+            "description": "List of active mechanics",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/MostActiveMechanicResponse" }
+            }
+          }
+        }
+      }
+    },
+    "/mechanics/{id}": {
+      "put": {
+        "tags": ["Mechanics"],
+        "summary": "Update mechanic",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "integer" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/MechanicPayload" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mechanic updated",
+            "schema": { "$ref": "#/definitions/MechanicResponse" }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Mechanics"],
+        "summary": "Delete mechanic",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "integer" }
+        ],
+        "responses": {
+          "200": { "description": "Mechanic deleted" }
+        }
+      }
+    },
+    "/inventory/": {
+      "get": {
+        "tags": ["Inventory"],
+        "summary": "Get all inventory items",
+        "responses": {
+          "200": {
+            "description": "Inventory list",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/InventoryResponse" }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Inventory"],
+        "summary": "Create inventory part",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/InventoryPayload" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Part created",
+            "schema": { "$ref": "#/definitions/InventoryResponse" }
+          }
+        }
+      }
+    },
+    "/inventory/{id}": {
+      "put": {
+        "tags": ["Inventory"],
+        "summary": "Update part",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "integer" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/InventoryPayload" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Part updated",
+            "schema": { "$ref": "#/definitions/InventoryResponse" }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Inventory"],
+        "summary": "Delete part",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "integer" }
+        ],
+        "responses": {
+          "200": { "description": "Part deleted message" }
+        }
+      }
+    },
+    "/service-tickets/": {
+      "get": {
+        "tags": ["Service Tickets"],
+        "summary": "Get all service tickets",
+        "responses": {
+          "200": {
+            "description": "Ticket list",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/ServiceTicketResponse" }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Service Tickets"],
+        "summary": "Create ticket",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/ServiceTicketPayload" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Ticket created",
+            "schema": { "$ref": "#/definitions/ServiceTicketResponse" }
+          }
+        }
+      }
+    },
+    "/service-tickets/{ticket_id}/edit": {
+      "put": {
+        "tags": ["Service Tickets"],
+        "summary": "Bulk add/remove mechanics from ticket",
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/TicketMechanicsEditPayload" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ticket updated",
+            "schema": { "$ref": "#/definitions/ServiceTicketResponse" }
+          }
+        }
+      }
+    },
+    "/service-tickets/{ticket_id}/add-part/{part_id}": {
+      "put": {
+        "tags": ["Service Tickets"],
+        "summary": "Add part to ticket",
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "part_id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Part assigned to ticket",
+            "schema": { "$ref": "#/definitions/ServiceTicketResponse" }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "CustomerPayload": {
+      "type": "object",
+      "required": ["name", "email", "phone", "password"],
+      "properties": {
+        "name": { "type": "string", "example": "Katie Keller" },
+        "email": { "type": "string", "example": "kkeller@example.com" },
+        "phone": { "type": "string", "example": "555-0199" },
+        "password": { "type": "string", "example": "securepass123" }
+      }
+    },
+    "CustomerUpdatePayload": {
+      "type": "object",
+      "properties": {
+        "phone": { "type": "string", "example": "555-9999" }
+      }
+    },
+    "CustomerResponse": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer", "example": 1 },
+        "name": { "type": "string", "example": "Katie Keller" },
+        "email": { "type": "string", "example": "kkeller@example.com" },
+        "phone": { "type": "string", "example": "555-0199" }
+      }
+    },
+    "CustomerPaginatedResponse": {
+      "type": "object",
+      "properties": {
+        "customers": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/CustomerResponse" }
+        },
+        "total": { "type": "integer", "example": 25 },
+        "page": { "type": "integer", "example": 1 },
+        "pages": { "type": "integer", "example": 3 }
+      }
+    },
+    "LoginPayload": {
+      "type": "object",
+      "required": ["email", "password"],
+      "properties": {
+        "email": { "type": "string", "example": "mkeller@example.com" },
+        "password": { "type": "string", "example": "123" }
+      }
+    },
+    "LoginResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string",
+          "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        },
+        "message": { "type": "string", "example": "Login successful" }
+      }
+    },
+    "MechanicPayload": {
+      "type": "object",
+      "required": ["name", "email", "phone", "salary"],
+      "properties": {
+        "name": { "type": "string", "example": "Mike Keller" },
+        "email": { "type": "string", "example": "mkeller@example.com" },
+        "phone": { "type": "string", "example": "555-8888" },
+        "salary": { "type": "number", "example": 100000.0 }
+      }
+    },
+    "MechanicResponse": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer", "example": 1 },
+        "name": { "type": "string", "example": "Mike Keller" },
+        "email": { "type": "string", "example": "mkeller@example.com" },
+        "phone": { "type": "string", "example": "555-8888" },
+        "salary": { "type": "number", "example": 65000.0 }
+      }
+    },
+    "MostActiveMechanicResponse": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer", "example": 1 },
+        "name": { "type": "string", "example": "Mike Keller" },
+        "tickets_worked": { "type": "integer", "example": 5 }
+      }
+    },
+    "InventoryPayload": {
+      "type": "object",
+      "required": ["name", "price"],
+      "properties": {
+        "name": { "type": "string", "example": "Brake Pad" },
+        "price": { "type": "number", "example": 45.99 }
+      }
+    },
+    "InventoryResponse": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer", "example": 1 },
+        "name": { "type": "string", "example": "Brake Pad" },
+        "price": { "type": "number", "example": 45.99 }
+      }
+    },
+    "ServiceTicketPayload": {
+      "type": "object",
+      "required": ["vin", "service_desc", "customer_id"],
+      "properties": {
+        "vin": { "type": "string", "example": "1HGCR2F83HA000000" },
+        "service_desc": {
+          "type": "string",
+          "example": "Brake replacement and oil change"
+        },
+        "customer_id": { "type": "integer", "example": 1 }
+      }
+    },
+    "ServiceTicketResponse": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer", "example": 1 },
+        "vin": { "type": "string", "example": "1HGCR2F83HA000000" },
+        "service_desc": {
+          "type": "string",
+          "example": "Brake replacement and oil change"
+        },
+        "customer_id": { "type": "integer", "example": 1 },
+        "mechanics": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/MechanicResponse" }
+        },
+        "parts": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/InventoryResponse" }
+        }
+      }
+    },
+    "TicketMechanicsEditPayload": {
+      "type": "object",
+      "properties": {
+        "add_ids": {
+          "type": "array",
+          "items": { "type": "integer" },
+          "example": [1, 2]
+        },
+        "remove_ids": {
+          "type": "array",
+          "items": { "type": "integer" },
+          "example": [3]
+        }
+      }
+    }
+  }
+}

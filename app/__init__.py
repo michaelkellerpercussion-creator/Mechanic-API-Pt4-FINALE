@@ -1,16 +1,31 @@
 from flask import Flask
 from app.extensions import cache, db, limiter, ma
+from flask_swagger_ui import get_swaggerui_blueprint
+from app.customers import customers_bp
+from app.mechanics import mechanics_bp
+from app.service_tickets import service_tickets_bp
+from app.inventory import inventory_bp
 
+SWAGGER_URL = '/api/docs'
+API_URL = '/static/swagger.json'
+
+swaggerui_bp = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={'app_name': "Mechanic Shop API Documentation"}
+)
 
 def create_app(config_name="DevelopmentConfig"):
     app = Flask(__name__)
-    app.config.from_object(f"app.config.{config_name}")
+    if config_name.startswith("app."):
+        config_path = config_name
+    elif config_name.startswith("config."):
+        config_path = f"app.{config_name}"
+    else:
+        config_path = f"app.config.{config_name}"
+    app.config.from_object(config_path)
 
-    from app.customers import customers_bp
-    from app.inventory import inventory_bp
-    from app.mechanics import mechanics_bp
-    from app.service_tickets import service_tickets_bp
-
+    app.register_blueprint(swaggerui_bp, url_prefix=SWAGGER_URL)
     app.register_blueprint(customers_bp, url_prefix="/customers")
     app.register_blueprint(inventory_bp, url_prefix="/inventory")
     app.register_blueprint(mechanics_bp, url_prefix="/mechanics")
