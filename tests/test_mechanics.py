@@ -25,7 +25,7 @@ class MechanicTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
     def test_create_mechanic_positive(self):
-        payload = {"name": "Mike", "email": "mike@example.com", "phone": "555-4444", "salary": 60000.0}
+        payload = {"name": "Mike", "email": "alice@example.com", "phone": "555-4444", "salary": 60000.0}
         res = self.client.post("/mechanics/", json=payload)
         self.assertEqual(res.status_code, 201)
 

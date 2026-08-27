@@ -31,7 +31,8 @@ def login():
     if errors:
         return jsonify(errors), 400
 
-    customer = db.session.query(Customer).filter_by(email=userdata.get('email')).first()
+    email = userdata.get('email', '').strip().lower()
+    customer = db.session.query(Customer).filter(db.func.lower(Customer.email) == email).first()
     
     # Check hashed password using werkzeug
     if customer and check_password_hash(customer.password, userdata.get('password')):

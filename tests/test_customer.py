@@ -1,8 +1,8 @@
 import unittest
-from werkzeug.security import generate_password_hash
 from app import create_app
 from app.extensions import db
 from app.models import Customer
+from werkzeug.security import generate_password_hash
 from app.utils.auth import encode_token
 
 class CustomerTestCase(unittest.TestCase):
@@ -16,7 +16,7 @@ class CustomerTestCase(unittest.TestCase):
         # initial customer
         self.customer = Customer(
             name="Mike Keller",
-            email="mike@example.com",
+            email="Alice@example.com",
             phone="555-1111",
             password=generate_password_hash("password123")
         )

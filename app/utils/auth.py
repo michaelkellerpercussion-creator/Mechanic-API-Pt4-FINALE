@@ -9,9 +9,10 @@ ALGORITHM = "HS256"
 
 # generates JWT
 def encode_token(customer_id):
+    issued_at = datetime.datetime.now(datetime.timezone.utc)
     payload = {
-        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24),
-        "iat": datetime.datetime.now(datetime.timezone.utc),
+        "exp": issued_at + datetime.timedelta(hours=24),
+        "iat": issued_at,
         "sub": str(customer_id)
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
