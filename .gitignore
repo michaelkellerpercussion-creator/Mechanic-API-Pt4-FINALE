@@ -1,5 +1,5 @@
 # Environment & Secrets
-.env/
+.env
 
 # Virtual Environments
 venv/
@@ -14,5 +14,13 @@ __pycache__/
 .pytest_cache/
 .vscode/
 
-# Flask Instance Folder (Database / Configs)
+# Database Files & Instance Folder
 instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# OS & Log Artifacts
+.DS_Store
+Thumbs.db
+*.log
