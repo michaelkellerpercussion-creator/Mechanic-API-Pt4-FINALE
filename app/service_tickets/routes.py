@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from app.service_tickets import service_tickets_bp
 from app.service_tickets.schemas import service_ticket_schema, service_tickets_schema
-from app.models import ServiceTicket, Mechanic, Inventory
+from app.models import ServiceTicket, Mechanic, Inventory, Customer
 from app.extensions import db
 
 @service_tickets_bp.route('/', methods=['POST'])
@@ -10,6 +10,9 @@ def create_service_ticket():
     errors = service_ticket_schema.validate(userdata)
     if errors:
         return jsonify(errors), 400
+
+    if not db.session.get(Customer, userdata.get('customer_id')):
+        return jsonify({"message": "Customer not found"}), 404
 
     new_ticket = service_ticket_schema.load(userdata)
     db.session.add(new_ticket)

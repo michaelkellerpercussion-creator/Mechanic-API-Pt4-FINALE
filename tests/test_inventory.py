@@ -1,24 +1,11 @@
-import unittest
-from app import create_app
-from app.extensions import db
-from app.models import Inventory
+from tests.base_test import BaseTestCase
 
-class InventoryTestCase(unittest.TestCase):
-    def setUp(self):
-        self.app = create_app("config.TestingConfig")
-        self.client = self.app.test_client()
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        db.create_all()
-
-        self.part = Inventory(name="Spark Plug", price=12.99)
-        db.session.add(self.part)
-        db.session.commit()
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
+class InventoryTestCase(BaseTestCase):
+    def test_get_inventory_positive(self):
+        self.create_test_part()
+        res = self.client.get("/inventory/")
+        self.assertEqual(res.status_code, 200)
+        self.assertIsInstance(res.get_json(), list)
 
     def test_create_part_positive(self):
         res = self.client.post("/inventory/", json={"name": "Filter", "price": 19.99})
@@ -27,6 +14,20 @@ class InventoryTestCase(unittest.TestCase):
     def test_create_part_negative(self):
         res = self.client.post("/inventory/", json={"name": "Missing Price"})
         self.assertEqual(res.status_code, 400)
+
+    def test_update_part_positive(self):
+        part = self.create_test_part()
+        res = self.client.put(f"/inventory/{part.id}", json={"name": "Premium Spark Plug", "price": 15.99})
+        self.assertEqual(res.status_code, 200)
+
+    def test_update_part_negative(self):
+        res = self.client.put("/inventory/9999", json={"name": "Nonexistent Part", "price": 10.00})
+        self.assertEqual(res.status_code, 404)
+
+    def test_delete_part_positive(self):
+        part = self.create_test_part()
+        res = self.client.delete(f"/inventory/{part.id}")
+        self.assertEqual(res.status_code, 200)
 
     def test_delete_part_negative(self):
         res = self.client.delete("/inventory/9999")
