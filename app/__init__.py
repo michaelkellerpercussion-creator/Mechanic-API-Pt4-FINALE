@@ -15,9 +15,8 @@ swaggerui_bp = get_swaggerui_blueprint(
     config={'app_name': "Mechanic Shop API Documentation"}
 )
 
-def create_app(config_class="config.DevelopmentConfig"):
+def create_app(config_name="DevelopmentConfig"):
     app = Flask(__name__)
-    app.config.from_object(config_class)
     if config_name.startswith("app."):
         config_path = config_name
     elif config_name.startswith("config."):
