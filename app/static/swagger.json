@@ -5,7 +5,7 @@
     "description": "RESTful API for managing customers, mechanics, service tickets, and inventory with JWT authentication, rate limiting, and caching.",
     "version": "1.0.0"
   },
-  "host": "127.0.0.1:5000",
+  "host": "https://mechanic-api-pt4-finale.onrender.com",
   "basePath": "/",
   "schemes": ["http"],
   "securityDefinitions": {
