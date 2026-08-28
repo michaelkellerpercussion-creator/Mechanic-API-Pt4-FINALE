@@ -5,6 +5,7 @@ from app.extensions import db
 from app.models import Customer, Mechanic, Inventory, ServiceTicket
 from app.utils.auth import encode_token
 
+#Set Up
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app("config.TestingConfig")
@@ -13,6 +14,7 @@ class BaseTestCase(unittest.TestCase):
         self.app_context.push()
         db.create_all()
 
+#Tear Down
     def tearDown(self):
         db.session.remove()
         db.drop_all()
