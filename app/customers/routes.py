@@ -54,13 +54,15 @@ def get_my_tickets(customer_id):
 def get_customers():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
-    paginated = db.paginate(db.select(Customer), page=page, per_page=per_page)
+    paginated = db.paginate(db.select(Customer), page=page, per_page=per_page, error_out=False)
     return jsonify({
-        "customers": customers_schema.dump(paginated.items),
-        "total": paginated.total,
+        "customers": customer_schema.dump(pagination.items, many=True),        "total": paginated.total,
         "page": paginated.page,
         "pages": paginated.pages
     }), 200
+
+except Exception as e:
+        return jsonify({"message": f"Server error: {str(e)}"}), 500
 
 @customers_bp.route('/<int:id>', methods=['PUT'])
 @token_required
