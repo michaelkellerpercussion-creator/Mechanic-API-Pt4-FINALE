@@ -7,7 +7,7 @@
   },
   "host": "mechanic-api-pt4-finale.onrender.com",
   "basePath": "/",
-  "schemes": ["http"],
+  "schemes": ["https"],
   "securityDefinitions": {
     "Bearer": {
       "type": "apiKey",
